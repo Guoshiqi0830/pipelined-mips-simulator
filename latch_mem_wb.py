@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-Latch between MEM and Write-Back stage 
-"""
-
 import random
 
 
@@ -25,7 +17,7 @@ def latch_mem_wb(clk, rst,
                  RegWrite_out, MemtoReg_out,     #signals to WB pipeline stage
                 ):
     """
-    Latch to control state between Execution and MEM pipeline stages
+    MEM 和 WB之间的寄存器
 
     """
 

@@ -1,23 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-Register file
-"""
-
 import random 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
                   intbv, bin, instance, instances, now, toVHDL
 
 
-def register_file (clk, read_reg1, read_reg2, write_reg, data_in, write_control, out_data1, out_data2, depth=32):
-    
+def register_file (clk, read_reg1, read_reg2, write_reg, data_in, 
+                    write_control, out_data1, out_data2, depth=32):
+    '''
+    寄存器存储单元
+    硬编码了一些值在寄存器存储单元中方便测试
+    '''
     mem = [Signal(intbv(i+1, min=-(2**31), max=2**31-1)) for i in range(depth)]
     #print mem
-
-
     @always(clk.negedge)
     def logic():
 

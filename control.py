@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-Control
-"""
-
 from myhdl import Signal, delay, always_comb, always, Simulation, \
                   intbv, bin, instance, instances, now, toVHDL
 
@@ -14,12 +6,12 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop, 
             MemWrite, ALUSrc, RegWrite, NopSignal=Signal(intbv(0)[1:]), Stall=Signal(intbv(0)[1:])):
     """
-    opcode -- 6bit opcode field from instruction
-    RegDst, ALUSrc, MemtoReg -- 1bit signals to control multiplexors
-    RegWrite, MemRead, MemWrite -- 1bit signals to control reads and writes 
-                                   in registers and memory
-    Branch -- 1bit signal to determining whether to possibly branch
-    ALUop -- 2bit control signal for the ALU
+    Control Unit
+    @param opcode 6位操作码
+    @param RegDst, ALUSrc, MemtoReg  1位信号，控制多路选择器
+    @param RegWrite, MemRead, MemWrite 1位信号，控制寄存器和内存的读写
+    @param Branch 1位信号，确定是否有分支
+    @param ALUop 2位信号，控制ALU
     """
 
     @always_comb
@@ -83,7 +75,7 @@ def testBench():
 
     opcode = Signal(intbv(0)[6:])
 
-    control_inst = toVHDL(control, opcode, RegDst, Branch, MemRead, MemtoReg, ALUop, MemWrite, ALUSrc, RegWrite)
+    # control_inst = toVHDL(control, opcode, RegDst, Branch, MemRead, MemtoReg, ALUop, MemWrite, ALUSrc, RegWrite)
 
     @instance
     def stimulus():

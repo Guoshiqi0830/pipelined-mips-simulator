@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-
-"""
-AND gate
-"""
-
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
@@ -17,11 +8,11 @@ from myhdl.conversion import analyze
 
 def and_gate(op1, op2, out):
     """
-    op1: operator 1. 
-    op2: operator 2. 
-    out: and
+    与门
+    @param op1: 操作数1
+    @param op2: 操作数2
+    @param out: and
     """
-
     @always_comb
     def logic():
         out.next = op1 & op2

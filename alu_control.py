@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-
-"""
-ALU CONTROL
-"""
-
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
@@ -15,8 +6,12 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 
 def alu_control(aluop, funct_field, control_out):
-    
-
+    '''
+    alu control
+    @param aluop: alu 操作码
+    @param funct_field func 操作码
+    @param control_out 输出操作
+    '''
     @always_comb
     def logic():
         if not aluop[0] and not aluop[1]:
@@ -58,7 +53,7 @@ def testBench_alu_control():
     funct_field_i = Signal(intbv(0)[6:])
     alu_control_lines = Signal(intbv(0)[4:])
 
-    alu_control_i = toVHDL(alu_control, aluop_i, funct_field_i, alu_control_lines)
+    # alu_control_i = toVHDL(alu_control, aluop_i, funct_field_i, alu_control_lines)
 
     @instance
     def stimulus():

@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-
-"""
-ALU
-"""
-
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
@@ -17,11 +8,12 @@ from myhdl.conversion import analyze
 
 def ALU(control, op1, op2, out_, zero):
     """
-    control : 4 bit control/selector vector.
-    op1: operator 1. 32bits
-    op2: operator 2. 32bits
-    out: ALU result. 32bits
-    zero: zero detector. ``1`` when out is 0. 
+    ALU
+    @param control : 4位控制向量
+    @param op1: 32位操作数1
+    @param op2: 32位操作数2
+    @param out: 32位ALU结果
+    @param zero: 输出为0时置1
 
     =============  =======================
      ALU control    Function
@@ -35,9 +27,6 @@ def ALU(control, op1, op2, out_, zero):
     =============  =======================
 
     """
-
-    
-
     @always_comb
     def logic_alu():
         if control == 0: #int('0000',2):
@@ -47,7 +36,7 @@ def ALU(control, op1, op2, out_, zero):
             out_.next =  op1 | op2
 
         elif control == 2 : #int('0010',2):
-            out_.next =  op1 + op2           #what happend if there is overflow ?
+            out_.next =  op1 + op2
        
         elif control == 6 : # int('0110',2):
             out_.next =  op1 - op2
@@ -60,7 +49,7 @@ def ALU(control, op1, op2, out_, zero):
                 out_.next = 0
 
         elif control == 12 : #int('1100', 2):
-            out_.next =  ~ (op1 | op2)   #TODO check this
+            out_.next =  ~ (op1 | op2)
     
 
     @always_comb

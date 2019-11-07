@@ -1,20 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-a generic clock driver
-"""
-
-
 from myhdl import Signal, delay, always_comb, always, Simulation, \
                   intbv, bin, instance, instances, now, toVHDL
 
 
-
-
 def clock_driver(clk, period=1):
-
+    '''
+    时钟驱动
+    '''
     halfPeriod = delay(period)
 
     @always(halfPeriod)

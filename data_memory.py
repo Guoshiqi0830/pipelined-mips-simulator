@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-Data Memory
-"""
-
 import random 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
@@ -15,19 +7,19 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 def data_memory(clk, address, write_data, read_data, memread, memwrite ):
     """
-    Ports:
-
-    clk -- trigger
-    read_data -- data out
-    write_data -- data in
-    address -- address bus
-    memwrite -- write enable: write if 1
-    memread -- interface enable: read address if 1
+    内存读写单元
+    @param clk -- 时钟驱动信号
+    @param read_data -- 输出数据
+    @param write_data -- 输入数据
+    @param address -- 数据地址
+    @param memwrite -- 控制是否写入数据
+    @param memread -- 控制是否读取数据
     """    
 
     mem = [Signal(intbv(0, min=-(2**31), max=2**31-1)) for i in range(1024)]
 
-    mem[7] = Signal(intbv(51, min=-(2**31), max=2**31-1))      #usefull to test load instruction directly
+    # 硬编码了一个内存数据用于测试
+    mem[7] = Signal(intbv(51, min=-(2**31), max=2**31-1))
     
     @always(clk.negedge)
     def logic():
@@ -36,8 +28,6 @@ def data_memory(clk, address, write_data, read_data, memread, memwrite ):
     
         elif memread == 1:
             read_data.next = mem[int(address)]
-
-        #print 'mem:', [int(i) for i in mem][0:20]
 
     return logic
 

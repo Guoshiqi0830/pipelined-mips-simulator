@@ -1,7 +1,3 @@
-"""
-Datapath
-"""
-
 from myhdl import Signal, delay, always, always_comb, now, Simulation, \
                   intbv, bin, instance, instances, now, toVHDL, traceSignals
 
@@ -30,9 +26,9 @@ from forwarding import forwarding
 from hazard_detector import hazard_detector
 
 
-SIM_TIME = 20   #time to simulation. 
+SIM_TIME = 20   # 模拟的时间 
 
-DEBUG = True  #set to false to convert 
+DEBUG = True  # 是否打印调试信息
 
 
 import random
@@ -48,7 +44,7 @@ MAX_16 = 2**15 - 1
 def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
 
     """
-    A DLX processor with 5 pipeline stages. 
+    5级流水线DLX处理器
     =======================================
 
     Stages
@@ -66,16 +62,15 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
                    |                                                       | 
                    |_______________________________________________________|
 
-    Conventions:
+    约定:
     ------------
 
-    * Signals are in ``CamelCase``
+    * 信号用驼峰命名法
 
-    * Instances are with ``under_score_`` (with a last ``_``)
+    * 实例用匈牙利命名法
 
-    * The signals shared two or more stage are suffixed with the pipeline stage to which it belongs.
-      For example: ``PcAdderO_if``  before IF/ID latch is the same signal than 
-      ``PcAdderO_id`` after it. 
+    * 为区分在两个及以上阶段使用的信号，增加了后缀。
+      例如：'PcAdderO_if' 在 IF阶段，PcAdderO_id 在ID阶段
 
     """
 
@@ -83,8 +78,9 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     # clock settings
     ##############################
 
-    Clk = Signal(intbv(0)[1:])     #internal clock
-    ClkPc = Signal(intbv(0)[1:])   #frec should be almost 1/4 clk internal
+    # 时钟信号
+    Clk = Signal(intbv(0)[1:])
+    ClkPc = Signal(intbv(0)[1:])
 
     clk_driver = clock_driver(Clk, clk_period)
     clk_driver_pc = clock_driver(ClkPc, clk_period * 4)
@@ -96,23 +92,26 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     # signals from and advanced stage which feeds a previous component
 
     BranchAdderO_mem = Signal(intbv(0, min=MIN, max=MAX)[32:])
-    PCSrc_mem   = Signal(intbv(0)[1:]) #control of mux for program_counter on IF stage - (branch or inmediante_next)    
 
-    FlushOnBranch = PCSrc_mem           # 1 when beq condition is asserted => flush IF / ID / EX to discard 
-                                        # instructions chargued wrongly
+    # IF级中控制PC的多路选择器的信号（branch or immediate）
+    PCSrc_mem   = Signal(intbv(0)[1:])
+    # 当分支指令时为1
+    FlushOnBranch = PCSrc_mem
 
-    WrRegDest_wb = Signal(intbv(0)[32:])        #register pointer where MuxMemO_wb data will be stored.
-    MuxMemO_wb = Signal(intbv(0, min=MIN, max=MAX))    #data output from WB mux connected as Write Data input on Register File (ID stage)
+    # MuxMemO_wb 数据的寄存器写入指针
+    WrRegDest_wb = Signal(intbv(0)[32:])
+    # WB输出的数据
+    MuxMemO_wb = Signal(intbv(0, min=MIN, max=MAX))
 
     RegWrite_wb = Signal(intbv(0)[1:])
 
-    ForwardA, ForwardB = [ Signal(intbv(0)[2:]) for i in range(2) ]     #Signals Generated in Forwarding units to control ALU's input muxers 
+    # Forwarding 单元中生成的信号，控制输入至ALU的多路选择器
+    ForwardA, ForwardB = [ Signal(intbv(0)[2:]) for i in range(2) ]
             
     AluResult_mem = Signal(intbv(0, min=MIN, max=MAX))
 
-    Stall = Signal(intbv(0)[1:])  #when asserted the pipeline is stalled. It 'freezes' PC count 
-                                  #and put all Control Signals to 0's
-    
+    # 判断流水线是否阻塞，该信号会使PC冻结，并把所有控制信号置零
+    Stall = Signal(intbv(0)[1:])
 
     
 
@@ -122,22 +121,26 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
 
     #instruction memory
 
-    Ip = Signal(intbv(0)[32:] ) #connect PC with intruction_memory
-    Instruction_if = Signal(intbv(0)[32:])   #32 bits instruction line.
+    # 连接PC 和 Instruction Memory
+    Ip = Signal(intbv(0)[32:] )
+    Instruction_if = Signal(intbv(0)[32:])
     im = instruction_memory (Ip, Instruction_if)
 
     #PC
-    NextIp =  Signal(intbv(0)[32:] )   #output of mux_branch - input of pc
+    # 输出至branch多路选择器，pc的输入
+    NextIp =  Signal(intbv(0)[32:] )
     pc = program_counter(Clk, NextIp, Ip, Stall)
 
     #pc_adder
-    INCREMENT = 1   #it's 4 in the book, but my instruction memory is organized in 32bits words, not in bytes
-    PcAdderOut_if =  Signal(intbv(0)[32:] )   #output of pc_adder - input0 branch_adder and mux_branch
+    # 这里的1代表1条指令，即4字节
+    INCREMENT = 1
+    # pc_addr 的输出，branch_adder and mux_branch的输入
+    PcAdderOut_if =  Signal(intbv(0)[32:] )
 
-    pc_adder = ALU(Signal(0b0010), Ip, Signal(INCREMENT), PcAdderOut_if, Signal(0))    #hardwiring an ALU to works as an adder
+    #复用ALU实现PC + 4
+    pc_adder = ALU(Signal(0b0010), Ip, Signal(INCREMENT), PcAdderOut_if, Signal(0))
     
-    #mux controlling next ip branches. 
-
+    #控制下条指令还是分支指令
     mux_pc_source = mux2(PCSrc_mem, NextIp, PcAdderOut_if, BranchAdderO_mem)
 
     ##############################
@@ -157,13 +160,13 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     ##############################
 
     #DECODER
-    Opcode_id = Signal(intbv(0)[6:])   #instruction 31:26  - to Control
-    Rs_id = Signal(intbv(0)[5:])       #instruction 25:21  - to read_reg_1
-    Rt_id = Signal(intbv(0)[5:])       #instruction 20:16  - to read_reg_2 and mux controlled by RegDst
-    Rd_id = Signal(intbv(0)[5:])       #instruction 15:11  - to the mux controlled by RegDst
-    Shamt_id = Signal(intbv(0)[5:])    #instruction 10:6   - 
-    Func_id = Signal(intbv(0)[6:])     #instruction 5:0    - to ALUCtrl
-    Address16_id = Signal(intbv(0, min=-(2**15), max=2**15 - 1))   #instruction 15:0   - to Sign Extend
+    Opcode_id = Signal(intbv(0)[6:])   #instruction 31:26  
+    Rs_id = Signal(intbv(0)[5:])       #instruction 25:21
+    Rt_id = Signal(intbv(0)[5:])       #instruction 20:16
+    Rd_id = Signal(intbv(0)[5:])       #instruction 15:11
+    Shamt_id = Signal(intbv(0)[5:])    #instruction 10:6
+    Func_id = Signal(intbv(0)[6:])     #instruction 5:0
+    Address16_id = Signal(intbv(0, min=-(2**15), max=2**15 - 1))   #instruction 15:0
 
     NopSignal = Signal(intbv(0)[1:])
 
@@ -207,11 +210,11 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     Data2_ex =  Signal(intbv(0, min=MIN, max=MAX))
     
 
-    Rs_ex = Signal(intbv(0)[5:])       #instruction 25:21  - to read_reg_1
-    Rt_ex = Signal(intbv(0)[5:])       #instruction 20:16  - to read_reg_2 and mux controlled by RegDst
-    Rd_ex = Signal(intbv(0)[5:])       #instruction 15:11  - to the mux controlled by RegDst
-    #Shamt_ex = Signal(intbv(0)[5:])    #instruction 10:6   - 
-    Func_ex = Signal(intbv(0)[6:])     #instruction 5:0    - to ALUCtrl
+    Rs_ex = Signal(intbv(0)[5:])       #instruction 25:21
+    Rt_ex = Signal(intbv(0)[5:])       #instruction 20:16
+    Rd_ex = Signal(intbv(0)[5:])       #instruction 15:11
+    #Shamt_ex = Signal(intbv(0)[5:])    #instruction 10:6
+    Func_ex = Signal(intbv(0)[6:])     #instruction 5:0
     
     Address32_ex = Signal(intbv(0, min=MIN, max=MAX)) 
 
@@ -221,17 +224,17 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
                                 Data1_id, Data2_id, Address32_id,
                                 Rs_id, Rt_id, Rd_id, Func_id, 
                                 
-                                RegDst_id, ALUop_id, ALUSrc_id,     #signals to EX pipeline stage
-                                Branch_id, MemRead_id, MemWrite_id, #signals to MEM pipeline stage
-                                RegWrite_id, MemtoReg_id,           #signals to WB pipeline stage
+                                RegDst_id, ALUop_id, ALUSrc_id,     #去到 EX 的信号
+                                Branch_id, MemRead_id, MemWrite_id, #去到 MEM 的信号
+                                RegWrite_id, MemtoReg_id,           #去到 WB 的信号
                                 
                                 PcAdderOut_ex, 
                                 Data1_ex, Data2_ex, Address32_ex,
                                 Rs_ex, Rt_ex, Rd_ex, Func_ex, 
 
-                                RegDst_ex, ALUop_ex, ALUSrc_ex,     #signals to EX pipeline stage
-                                Branch_ex, MemRead_ex, MemWrite_ex, #signals to MEM pipeline stage
-                                RegWrite_ex, MemtoReg_ex            #signals to WB pipeline stage
+                                RegDst_ex, ALUop_ex, ALUSrc_ex,     #去到 EX 的信号
+                                Branch_ex, MemRead_ex, MemWrite_ex, #去到 MEM 的信号
+                                RegWrite_ex, MemtoReg_ex            #去到 WB 的信号
                                )
 
 
@@ -244,7 +247,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     Zero_ex = Signal(intbv(0)[1:])
     AluResult_ex = Signal(intbv(0, min=MIN, max=MAX))
 
-    ForwMux1Out, ForwMux2Out = [ Signal(intbv(0, min=MIN, max=MAX)) for i in range(2) ]  #Output of forw_mux1 and forw_mux2
+    ForwMux1Out, ForwMux2Out = [ Signal(intbv(0, min=MIN, max=MAX)) for i in range(2) ]
 
     MuxAluDataSrc_ex = Signal(intbv(0, min=MIN, max=MAX))
 
@@ -256,8 +259,6 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
 
     forw_mux2_ = mux4(ForwardB, ForwMux2Out, Data2_ex, MuxMemO_wb, AluResult_mem)
 
-
-    #2nd muxer of 2nd operand in ALU
     mux_alu_src = mux2(ALUSrc_ex, MuxAluDataSrc_ex, ForwMux2Out, Address32_ex)
 
     #Branch adder
@@ -270,7 +271,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     #ALU
     alu_ = ALU(AluControl, ForwMux1Out, MuxAluDataSrc_ex, AluResult_ex, Zero_ex)
 
-    #Mux RegDestiny Control Write register between rt and rd. 
+    #控制写入寄存器是rt或rd
     mux_wreg = mux2(RegDst_ex, WrRegDest_ex, Rt_ex, Rd_ex)
 
     
@@ -296,14 +297,14 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
                                 BranchAdderO_ex,
                                 AluResult_ex, Zero_ex, 
                                 Data2_ex, WrRegDest_ex, 
-                                Branch_ex, MemRead_ex, MemWrite_ex,  #signals to MEM pipeline stage
-                                RegWrite_ex, MemtoReg_ex,     #signals to WB pipeline stage
+                                Branch_ex, MemRead_ex, MemWrite_ex,  #去到 MEM 的信号
+                                RegWrite_ex, MemtoReg_ex,     #去到 WB 的信号
                                 
                                 BranchAdderO_mem,
                                 AluResult_mem, Zero_mem, 
                                 Data2_mem, WrRegDest_mem, 
-                                Branch_mem, MemRead_mem, MemWrite_mem,  #signals to MEM pipeline stage
-                                RegWrite_mem, MemtoReg_mem,     #signals to WB pipeline stage
+                                Branch_mem, MemRead_mem, MemWrite_mem,  #去到 MEM 的信号
+                                RegWrite_mem, MemtoReg_mem,     #去到 WB 的信号
                                 
                             )
     
@@ -337,12 +338,12 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
                                  DataMemOut_mem, 
                                  AluResult_mem, 
                                  WrRegDest_mem, 
-                                 RegWrite_mem, MemtoReg_mem,     #signals to WB pipeline stage
+                                 RegWrite_mem, MemtoReg_mem,     #去到 WB 的信号
                                  
                                  DataMemOut_wb, 
                                  AluResult_wb, 
                                  WrRegDest_wb, 
-                                 RegWrite_wb, MemtoReg_wb,     #signals to WB pipeline stage
+                                 RegWrite_wb, MemtoReg_wb,     #去到 WB 的信号
                                  )
 
     ##############################

@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-2-channel of Generic-bits multiplexor
-"""
-
 import random
 
 
@@ -17,11 +9,7 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 def mux2(sel, mux_out, chan1, chan2):
     """
-    2-channels m-bits multiplexor
-
-    channels: generic bits input vectors
-    mux_out: is the output vector
-    sel: is the channel selector
+    2 通道的多路选择器
     """
 
     @always_comb
@@ -36,11 +24,7 @@ def mux2(sel, mux_out, chan1, chan2):
 
 def mux4(sel, mux_out, chan1, chan2, chan3, chan4=Signal(0)):
     """
-    4-channels m-bits multiplexor
-
-    channels: generic bits input vectors
-    mux_out: is the output vector
-    sel: is the channel selector
+    4 通道的多路选择器
     """
 
     @always_comb

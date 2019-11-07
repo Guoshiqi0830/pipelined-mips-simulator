@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-Forwarding Unit
-"""
-
 import random
 
 
@@ -14,17 +6,17 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 
 
-def forwarding(RegWrite_mem, Rd_mem, Rs_ex, Rt_ex,     #inputs of EX hazards
-                RegWrite_wb, Rd_wb,   #left inputs of MEM hazards
+def forwarding(RegWrite_mem, Rd_mem, Rs_ex, Rt_ex,
+                RegWrite_wb, Rd_wb,
                 ForwardA, ForwardB
                 ):
     """
-    Detects and controls forwarding for 2 pairs of data hazard conditions:
-
+    转发
+    检测以下两类冒险
         1a. Rd_mem = Rs_ex
         1b. Rd_mem = Rt_ex
 
-        1a. Rd_wb = Rs_ex
+        2a. Rd_wb = Rs_ex
         2b. Rd_wb = Rt_ex
     """
 

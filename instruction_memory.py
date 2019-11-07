@@ -1,14 +1,11 @@
-
-
-"""
-Instruction memory
-"""
-
 from myhdl import Signal, delay, always_comb, now, Simulation, \
                   intbv, bin, instance, instances, toVHDL, toVerilog
 
 
 def load_program(ROM, program=None, comment_char='#' ):
+    '''
+    从文件中读取指令
+    '''
     if program is None:
         try:
             import sys
@@ -16,7 +13,7 @@ def load_program(ROM, program=None, comment_char='#' ):
             import pdb;pdb.set_trace()
         except IndexError:
             #default
-            program= './programs/simple.txt'
+            program= './programs/programs.txt'
 
     index = 0
     for line in open(program):
@@ -32,8 +29,9 @@ ROM = load_program([0] * 32)
 
 def instruction_memory(address, instruction):
     """
-    address -- the pointer defined by PC
-    instruction -- 32 bit encoded instruction
+    指令存储单元
+    @param address: PC指定的地址
+    @param instruction: 32位指令
     """
 
     @always_comb
@@ -51,7 +49,7 @@ def testBench():
 
 
     #pd_instance = prime_detector(E, S)
-    im_instance = toVHDL(instruction_memory, I, O)
+    #im_instance = toVHDL(instruction_memory, I, O)
 
     @instance
     def stimulus():

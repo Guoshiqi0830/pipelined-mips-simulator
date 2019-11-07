@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-Latch between IF and ID stage 
-"""
-
 import random
 
 
@@ -16,16 +8,7 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 def latch_if_id(clk, rst, instruction_in, pc_adder_in, instruction_out, pc_adder_out, stall=Signal(intbv(0)[1:]) ):
     """
-    Latch to control state between Instruction Fetch and Instruction Decoder
-
-    clk -- trigger
-    rst -- reset 
-    instruction_in  -- 32 bits signal input
-    pc_adder_in -- 32 bits signal input
-    instruction_out  -- 32 bits signal output for instruction decoder
-    pc_adder_out -- 32 bits signal output for pc_add
-
-    stall -- inhibit the count increment
+    IF 和 ID 之间的寄存器
     """
 
     @always(clk.posedge, rst.posedge)

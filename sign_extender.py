@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-Sign Extender
-"""
-
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
@@ -13,7 +5,9 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 
 def sign_extend(input16, output32):
-    
+    '''
+    扩展单元
+    '''
     @always_comb
     def logic():
         output32.next = input16.val

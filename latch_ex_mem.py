@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-Latch between EX and MEM stage 
-"""
-
 import random
 
 
@@ -27,8 +19,7 @@ def latch_ex_mem(clk, rst,
                 RegWrite_out, MemtoReg_out,     
                 ):
     """
-    Latch to control state between Execution and MEM pipeline stages
-
+    EX 和 MEM 阶段之间的寄存器
     """
 
     @always(clk.posedge, rst.posedge)
@@ -78,18 +69,18 @@ def testBench():
     clk = Signal(intbv(0)[1:])
     rst = Signal(intbv(0)[1:])
    
-    latch_inst = toVHDL(latch_ex_mem, clk, rst, 
-                                branch_adder_in, 
-                                alu_result_in, zero_in, 
-                                data2_in, wr_reg_in, 
-                                Branch_in, MemRead_in, MemWrite_in,  #signals to MEM pipeline stage
-                                RegWrite_in, MemtoReg_in,     #signals to WB pipeline stage
-                                branch_adder_out, 
-                                alu_result_out, zero_out, 
-                                data2_out, wr_reg_out, 
-                                Branch_out, MemRead_out, MemWrite_out, 
-                                RegWrite_out, MemtoReg_out,     
-                                )
+    # latch_inst = toVHDL(latch_ex_mem, clk, rst, 
+    #                             branch_adder_in, 
+    #                             alu_result_in, zero_in, 
+    #                             data2_in, wr_reg_in, 
+    #                             Branch_in, MemRead_in, MemWrite_in,  #signals to MEM pipeline stage
+    #                             RegWrite_in, MemtoReg_in,     #signals to WB pipeline stage
+    #                             branch_adder_out, 
+    #                             alu_result_out, zero_out, 
+    #                             data2_out, wr_reg_out, 
+    #                             Branch_out, MemRead_out, MemWrite_out, 
+    #                             RegWrite_out, MemtoReg_out,     
+    #                             )
 
     @instance
     def stimulus():

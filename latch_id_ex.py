@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-
-"""
-Latch between ID and EX stage 
-"""
-
 import random
 
 
@@ -29,8 +21,7 @@ def latch_id_ex(clk, rst,
                 RegWrite_out, MemtoReg_out,     
                 ):
     """
-    Latch to control state between Instruction Decoding and Execution
-
+    ID 和 EX 阶段之间的寄存器
     """
 
     @always(clk.posedge, rst.posedge)

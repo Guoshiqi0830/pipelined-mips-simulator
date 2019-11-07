@@ -16,10 +16,10 @@ from alu import ALU
 
 def program_counter(clk, input, output, stall=Signal(intbv(0)[1:])):
     """
-
-    clk : clock signal 
-    input: the input count
-    output: address output
+    PC
+    @param clk : 时钟信号 
+    @param input: 输入
+    @param output: 输出
     """
 
     @always(clk.negedge)

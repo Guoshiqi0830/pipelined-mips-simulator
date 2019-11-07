@@ -1,7 +1,3 @@
-"""
-Hazard detection Unit
-"""
-
 import random
 
 
@@ -15,13 +11,9 @@ def hazard_detector(MemRead_ex, Rt_ex,
                           Stall
                         ):
     """
-    Stalls the pipeline when a instruction try to read a register 
-    following a load instruction that writes the same register. 
-    (raw data hazard)
-
-    it controls the writing of PC and IF/ID registers plus a multiplexor
-    that choose between the real control values or all 0s
-
+    冒险检测单元
+    当一条指令读取寄存器的时候，另一条紧跟着的指令写同一个寄存器，这时阻塞流水线。
+    stall 信号控制PC和 IF/ID寄存器，使之置零
     """
 
     @always_comb
